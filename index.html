@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkedIn CRM | Mint Edition </title>
+    <style>
+        :root {
+            --bg: #fafaf5;
+            --surface: #ffffff;
+            --card: #ffffff;
+            --text-main: #24292f;
+            --text-muted: #57606a;
+            --accent: #0a7c6a;
+            --accent-soft: rgba(10, 124, 106, 0.08);
+            --success: #1a7f37;
+            --danger: #cf222e;
+            --border: #d0d7de;
+            --radius: 12px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, system-ui, sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            margin: 0;
+            padding: 24px;
+            line-height: 1.5;
+        }
+
+        /* Cabecera Hero */
+        .hero-header {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px 32px;
+            margin-bottom: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+        }
+
+        .process-info h1 {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-badge {
+            font-size: 0.7rem;
+            background: var(--accent-soft);
+            color: var(--accent);
+            padding: 4px 12px;
+            border-radius: 20px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 700;
+        }
+
+        .process-info p {
+            margin: 4px 0 0 0;
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        .actions-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .process-select {
+            background: var(--bg);
+            color: var(--text-main);
+            border: 1px solid var(--border);
+            padding: 10px 16px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            min-width: 200px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        /* Formulario */
+        .form-section {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 24px;
+            margin-bottom: 32px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+        }
+
+        input, select {
+            background: #fdfdfd;
+            border: 1px solid var(--border);
+            color: var(--text-main);
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+        }
+
+        input:focus { border-color: var(--accent); outline: none; box-shadow: 0 0 0 3px var(--accent-soft); }
+
+        button {
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.85rem;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary { background: var(--accent); color: white; }
+        .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
+        .btn-outline { background: white; border: 1px solid var(--border); color: var(--text-muted); }
+        .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+        .btn-danger { background: transparent; color: var(--danger); }
+        .btn-danger:hover { background: #fff5f5; }
+
+        /* Tablero */
+        .board { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 20px; }
+
+        .column {
+            background: rgba(234, 238, 242, 0.4);
+            border-radius: var(--radius);
+            min-width: 300px;
+            flex: 1;
+            padding: 16px;
+            min-height: 500px;
+        }
+
+        .column.drag-over { background: var(--accent-soft); border: 2px dashed var(--accent); }
+
+        .column h3 {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin: 0 0 16px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .count-badge { background: #e1e4e8; color: var(--text-main); padding: 2px 10px; border-radius: 20px; font-size: 0.75rem; }
+
+        /* Tarjetas */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 14px;
+            cursor: grab;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            transition: all 0.2s;
+        }
+
+        .card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 15px rgba(0,0,0,0.05); }
+        .card.dragging { opacity: 0.4; }
+        .card h4 { margin: 0 0 8px 0; color: var(--text-main); font-size: 1.05rem; }
+        .card-tag { font-size: 0.7rem; background: var(--accent-soft); color: var(--accent); padding: 4px 10px; border-radius: 6px; font-weight: 800; margin-bottom: 12px; display: inline-block; }
+
+        /* Rejilla de contacto actualizada para texto plano */
+        .contact-grid { 
+            display: grid; 
+            grid-template-columns: auto 1fr; 
+            gap: 8px 12px; /* Aumentado el gap horizontal */
+            font-size: 0.85rem; 
+            color: var(--text-main); /* Texto principal para mayor visibilidad */
+            align-items: center;
+        }
+        
+        /* Estilo para el enlace de LinkedIn (único enlace que mantenemos) */
+        .contact-grid a { 
+            color: var(--accent); 
+            text-decoration: none; 
+            font-weight: 500;
+        }
+        .contact-grid a:hover { text-decoration: underline; }
+
+        /* Estilo para los datos de texto plano */
+        .contact-data-text {
+            color: var(--text-main);
+            word-break: break-all; /* Evita que correos largos rompan la tarjeta */
+        }
+
+        .card-footer { margin-top: 15px; padding-top: 12px; border-top: 1px solid #f3f4f6; display: flex; justify-content: flex-end; }
+
+        footer { text-align: center; padding: 40px; opacity: 0.4; font-size: 0.8rem; }
+    </style>
+</head>
+<body>
+
+<div class="hero-header">
+    <div class="process-info">
+        <h1 id="displayProcessName">Sourcing General <span class="status-badge">Activo</span></h1>
+        <p>Gestionando candidatos en este proceso de selección</p>
+    </div>
+    <div class="actions-group">
+        <select id="currentProcess" class="process-select" onchange="changeProcess()"></select>
+        <button onclick="createNewProcess()" class="btn-outline"><span>+</span> Nuevo</button>
+        <button onclick="deleteCurrentProcess()" class="btn-danger">Eliminar</button>
+    </div>
+</div>
+
+<div class="form-section">
+    <input type="text" id="name" placeholder="Nombre completo" style="grid-column: span 2;">
+    <input type="url" id="linkedin" placeholder="LinkedIn URL" style="grid-column: span 2;">
+    <input type="email" id="email" placeholder="Correo">
+    <input type="tel" id="phone" placeholder="Teléfono">
+    <input type="text" id="salary" placeholder="Banda Salarial">
+    <select id="status">
+        <option value="Invitado">Invitado</option>
+        <option value="Aceptado">Aceptado</option>
+        <option value="Llamado">Llamado</option>
+        <option value="Entrevista">Entrevista</option>
+        <option value="Manager">Manager</option>
+    </select>
+    <button onclick="addCandidate()" class="btn-primary">Añadir Candidato</button>
+</div>
+
+<div class="board" id="mainBoard"></div>
+
+<footer>
+    <span style="cursor:pointer;" onclick="resetApp()">Reiniciar aplicación por completo</span>
+</footer>
+
+<script>
+    let processes = JSON.parse(localStorage.getItem('li_crm_mint_proc')) || ["Sourcing General"];
+    let currentProcess = localStorage.getItem('li_crm_mint_sel') || processes[0];
+    let candidates = JSON.parse(localStorage.getItem('li_crm_mint_cand')) || [];
+    const columns = ['Invitado', 'Aceptado', 'Llamado', 'Entrevista', 'Manager'];
+
+    function init() {
+        // Actualizar el título visual grande
+        document.getElementById('displayProcessName').innerHTML = `${currentProcess} <span class="status-badge">Activo</span>`;
+        
+        const select = document.getElementById('currentProcess');
+        select.innerHTML = '';
+        processes.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value = p; opt.textContent = p;
+            if(p === currentProcess) opt.selected = true;
+            select.appendChild(opt);
+        });
+        renderBoard();
+    }
+
+    function createNewProcess() {
+        const name = prompt("Nombre del nuevo proceso:");
+        if (name && !processes.includes(name)) {
+            processes.push(name);
+            currentProcess = name;
+            saveAndRefresh();
+        }
+    }
+
+    function deleteCurrentProcess() {
+        if (processes.length <= 1) return;
+        if (confirm(`¿Eliminar proceso "${currentProcess}" y sus datos?`)) {
+            candidates = candidates.filter(c => c.process !== currentProcess);
+            processes = processes.filter(p => p !== currentProcess);
+            currentProcess = processes[0];
+            saveAndRefresh();
+        }
+    }
+
+    function changeProcess() {
+        currentProcess = document.getElementById('currentProcess').value;
+        saveAndRefresh();
+    }
+
+    function addCandidate() {
+        const name = document.getElementById('name').value;
+        if(!name) return;
+        candidates.push({
+            id: Date.now().toString(),
+            process: currentProcess,
+            name,
+            linkedin: document.getElementById('linkedin').value,
+            email: document.getElementById('email').value,
+            phone: document.getElementById('phone').value,
+            salary: document.getElementById('salary').value,
+            status: document.getElementById('status').value
+        });
+        saveAndRefresh();
+        ['name', 'linkedin', 'email', 'phone', 'salary'].forEach(id => document.getElementById(id).value = '');
+    }
+
+    function deleteCandidate(id) {
+        if(confirm("¿Eliminar?")) {
+            candidates = candidates.filter(c => c.id !== id);
+            saveAndRefresh();
+        }
+    }
+
+    function allowDrop(e) { e.preventDefault(); e.currentTarget.classList.add('drag-over'); }
+    function dragLeave(e) { e.currentTarget.classList.remove('drag-over'); }
+    function startDrag(e) { 
+        e.dataTransfer.setData('text', e.target.id.replace('card-', ''));
+        e.target.classList.add('dragging');
+    }
+    function dropCandidate(e, newStatus) {
+        e.preventDefault();
+        e.currentTarget.classList.remove('drag-over');
+        const id = e.dataTransfer.getData('text');
+        candidates = candidates.map(c => c.id === id ? {...c, status: newStatus} : c);
+        saveAndRefresh();
+    }
+
+    function saveAndRefresh() {
+        localStorage.setItem('li_crm_mint_proc', JSON.stringify(processes));
+        localStorage.setItem('li_crm_mint_sel', currentProcess);
+        localStorage.setItem('li_crm_mint_cand', JSON.stringify(candidates));
+        renderBoard();
+        init();
+    }
+
+    function renderBoard() {
+        const board = document.getElementById('mainBoard');
+        board.innerHTML = '';
+        columns.forEach(col => {
+            const colCandidates = candidates.filter(c => c.process === currentProcess && c.status === col);
+            const colEl = document.createElement('div');
+            colEl.className = 'column';
+            colEl.ondragover = allowDrop;
+            colEl.ondragleave = dragLeave;
+            colEl.ondrop = (e) => dropCandidate(e, col);
+            colEl.innerHTML = `<h3>${col} <span class="count-badge">${colCandidates.length}</span></h3><div id="list-${col}"></div>`;
+            const list = colEl.querySelector(`#list-${col}`);
+            colCandidates.forEach(c => {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.id = `card-${c.id}`;
+                card.draggable = true;
+                card.ondragstart = startDrag;
+                card.ondragend = (e) => e.target.classList.remove('dragging');
+                
+                // CAMBIO CLAVE AQUÍ: Mapeo de datos directos en lugar de enlaces
+                card.innerHTML = `
+                    <span class="card-tag">${c.salary || 'S.B.'}</span>
+                    <h4>${c.name}</h4>
+                    <div class="contact-grid">
+                        <span>🔗</span> <a href="${c.linkedin}" target="_blank">Ver Perfil</a>
+                        ${c.email ? `<span>📧</span> <span class="contact-data-text">${c.email}</span>` : ''}
+                        ${c.phone ? `<span>📞</span> <span class="contact-data-text">${c.phone}</span>` : ''}
+                    </div>
+                    <div class="card-footer">
+                        <button onclick="deleteCandidate('${c.id}')" class="btn-danger" style="font-size:0.7rem; padding:4px 8px;">Eliminar</button>
+                    </div>
+                `;
+                list.appendChild(card);
+            });
+            board.appendChild(colEl);
+        });
+    }
+
+    function resetApp() { if(confirm("¿Resetear?")) { localStorage.clear(); location.reload(); } }
+    init();
+</script>
+</body>
+</html>
