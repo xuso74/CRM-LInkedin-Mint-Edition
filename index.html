@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LinkedIn CRM | Mint Edition </title>
+    <title>LinkedIn CRM | Mint Edition - Editable</title>
     <style>
         :root {
             --bg: #fafaf5;
@@ -28,7 +28,6 @@
             line-height: 1.5;
         }
 
-        /* Cabecera Hero */
         .hero-header {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -62,17 +61,7 @@
             font-weight: 700;
         }
 
-        .process-info p {
-            margin: 4px 0 0 0;
-            color: var(--text-muted);
-            font-size: 0.9rem;
-        }
-
-        .actions-group {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
+        .actions-group { display: flex; gap: 10px; align-items: center; }
 
         .process-select {
             background: var(--bg);
@@ -86,7 +75,6 @@
             cursor: pointer;
         }
 
-        /* Formulario */
         .form-section {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -129,7 +117,6 @@
         .btn-danger { background: transparent; color: var(--danger); }
         .btn-danger:hover { background: #fff5f5; }
 
-        /* Tablero */
         .board { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 20px; }
 
         .column {
@@ -141,7 +128,7 @@
             min-height: 500px;
         }
 
-        .column.drag-over { background: var(--accent-soft); border: 2px dashed var(--accent); }
+        .column.drag-over { border: 2px dashed var(--accent); background: var(--accent-soft); }
 
         .column h3 {
             font-size: 0.8rem;
@@ -155,7 +142,6 @@
 
         .count-badge { background: #e1e4e8; color: var(--text-main); padding: 2px 10px; border-radius: 20px; font-size: 0.75rem; }
 
-        /* Tarjetas */
         .card {
             background: var(--card);
             border: 1px solid var(--border);
@@ -169,32 +155,33 @@
 
         .card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 15px rgba(0,0,0,0.05); }
         .card.dragging { opacity: 0.4; }
+        
+        /* Estilos para campos editables */
+        .editable {
+            transition: background 0.2s;
+            border-radius: 4px;
+            padding: 2px 4px;
+            margin-left: -4px;
+        }
+        .editable:hover { background: var(--accent-soft); cursor: text; }
+        .editable:focus { background: white; outline: 2px solid var(--accent); cursor: text; }
+
         .card h4 { margin: 0 0 8px 0; color: var(--text-main); font-size: 1.05rem; }
         .card-tag { font-size: 0.7rem; background: var(--accent-soft); color: var(--accent); padding: 4px 10px; border-radius: 6px; font-weight: 800; margin-bottom: 12px; display: inline-block; }
 
-        /* Rejilla de contacto actualizada para texto plano */
         .contact-grid { 
             display: grid; 
             grid-template-columns: auto 1fr; 
-            gap: 8px 12px; /* Aumentado el gap horizontal */
+            gap: 8px 12px; 
             font-size: 0.85rem; 
-            color: var(--text-main); /* Texto principal para mayor visibilidad */
+            color: var(--text-main); 
             align-items: center;
         }
         
-        /* Estilo para el enlace de LinkedIn (único enlace que mantenemos) */
-        .contact-grid a { 
-            color: var(--accent); 
-            text-decoration: none; 
-            font-weight: 500;
-        }
+        .contact-grid a { color: var(--accent); text-decoration: none; font-weight: 500; }
         .contact-grid a:hover { text-decoration: underline; }
 
-        /* Estilo para los datos de texto plano */
-        .contact-data-text {
-            color: var(--text-main);
-            word-break: break-all; /* Evita que correos largos rompan la tarjeta */
-        }
+        .contact-data-text { word-break: break-all; min-height: 1em; display: inline-block; min-width: 50px; }
 
         .card-footer { margin-top: 15px; padding-top: 12px; border-top: 1px solid #f3f4f6; display: flex; justify-content: flex-end; }
 
@@ -205,7 +192,7 @@
 
 <div class="hero-header">
     <div class="process-info">
-        <h1 id="displayProcessName">Sourcing General <span class="status-badge">Activo</span></h1>
+        <h1 id="displayProcessName">Cargando... <span class="status-badge">Activo</span></h1>
         <p>Gestionando candidatos en este proceso de selección</p>
     </div>
     <div class="actions-group">
@@ -244,9 +231,7 @@
     const columns = ['Invitado', 'Aceptado', 'Llamado', 'Entrevista', 'Manager'];
 
     function init() {
-        // Actualizar el título visual grande
         document.getElementById('displayProcessName').innerHTML = `${currentProcess} <span class="status-badge">Activo</span>`;
-        
         const select = document.getElementById('currentProcess');
         select.innerHTML = '';
         processes.forEach(p => {
@@ -269,7 +254,7 @@
 
     function deleteCurrentProcess() {
         if (processes.length <= 1) return;
-        if (confirm(`¿Eliminar proceso "${currentProcess}" y sus datos?`)) {
+        if (confirm(`¿Eliminar proceso "${currentProcess}"?`)) {
             candidates = candidates.filter(c => c.process !== currentProcess);
             processes = processes.filter(p => p !== currentProcess);
             currentProcess = processes[0];
@@ -297,6 +282,18 @@
         });
         saveAndRefresh();
         ['name', 'linkedin', 'email', 'phone', 'salary'].forEach(id => document.getElementById(id).value = '');
+    }
+
+    // Función mágica para editar datos
+    function updateCandidate(id, field, value) {
+        candidates = candidates.map(c => {
+            if (c.id === id) {
+                return { ...c, [field]: value.trim() };
+            }
+            return c;
+        });
+        localStorage.setItem('li_crm_mint_cand', JSON.stringify(candidates));
+        // No refrescamos todo el board para no perder el foco mientras se edita
     }
 
     function deleteCandidate(id) {
@@ -348,14 +345,13 @@
                 card.ondragstart = startDrag;
                 card.ondragend = (e) => e.target.classList.remove('dragging');
                 
-                // CAMBIO CLAVE AQUÍ: Mapeo de datos directos en lugar de enlaces
                 card.innerHTML = `
-                    <span class="card-tag">${c.salary || 'S.B.'}</span>
-                    <h4>${c.name}</h4>
+                    <span class="card-tag editable" contenteditable="true" onblur="updateCandidate('${c.id}', 'salary', this.innerText)">${c.salary || 'S.B.'}</span>
+                    <h4 class="editable" contenteditable="true" onblur="updateCandidate('${c.id}', 'name', this.innerText)">${c.name}</h4>
                     <div class="contact-grid">
                         <span>🔗</span> <a href="${c.linkedin}" target="_blank">Ver Perfil</a>
-                        ${c.email ? `<span>📧</span> <span class="contact-data-text">${c.email}</span>` : ''}
-                        ${c.phone ? `<span>📞</span> <span class="contact-data-text">${c.phone}</span>` : ''}
+                        <span>📧</span> <span class="contact-data-text editable" contenteditable="true" onblur="updateCandidate('${c.id}', 'email', this.innerText)">${c.email || ''}</span>
+                        <span>📞</span> <span class="contact-data-text editable" contenteditable="true" onblur="updateCandidate('${c.id}', 'phone', this.innerText)">${c.phone || ''}</span>
                     </div>
                     <div class="card-footer">
                         <button onclick="deleteCandidate('${c.id}')" class="btn-danger" style="font-size:0.7rem; padding:4px 8px;">Eliminar</button>
