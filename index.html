@@ -221,7 +221,7 @@
     <select id="status">
         <option value="Invitado">Invitado</option>
         <option value="Aceptado">Aceptado</option>
-        <option value="Llamado">Mensaje</option>
+        <option value="Mensaje">Mensaje</option>
         <option value="Entrevista">Entrevista</option>
         <option value="Manager">Manager</option>
         <option value="Contratado">Contratado</option>
@@ -241,7 +241,7 @@
     let currentProcess = localStorage.getItem('li_crm_mint_sel') || processes[0];
     let candidates = JSON.parse(localStorage.getItem('li_crm_mint_cand')) || [];
     // Actualizado con las 2 nuevas columnas
-    const columns = ['Invitado', 'Aceptado', 'Llamado', 'Entrevista', 'Manager', 'Contratado', 'Descartado'];
+    const columns = ['Invitado', 'Aceptado', 'Mensaje', 'Entrevista', 'Manager', 'Contratado', 'Descartado'];
 
     function init() {
         document.getElementById('displayProcessName').innerHTML = `${currentProcess} <span class="status-badge">Activo</span>`;
