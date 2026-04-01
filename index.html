@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LinkedIn CRM | Mint Edition - Editable</title>
+    <title>LinkedIn CRM | Mint Edition - Full Pipeline</title>
     <style>
         :root {
             --bg: #fafaf5;
@@ -117,18 +117,29 @@
         .btn-danger { background: transparent; color: var(--danger); }
         .btn-danger:hover { background: #fff5f5; }
 
-        .board { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 20px; }
+        /* Tablero Ajustado para más columnas */
+        .board { 
+            display: flex; 
+            gap: 16px; 
+            overflow-x: auto; 
+            padding-bottom: 20px;
+            align-items: flex-start;
+        }
 
         .column {
             background: rgba(234, 238, 242, 0.4);
             border-radius: var(--radius);
-            min-width: 300px;
-            flex: 1;
+            min-width: 280px;
+            flex: 0 0 280px;
             padding: 16px;
-            min-height: 500px;
+            min-height: 600px;
         }
 
         .column.drag-over { border: 2px dashed var(--accent); background: var(--accent-soft); }
+
+        /* Estilos específicos para columnas finales */
+        .column[data-col="Contratado"] { background: rgba(26, 127, 55, 0.05); }
+        .column[data-col="Descartado"] { background: rgba(207, 34, 46, 0.03); opacity: 0.8; }
 
         .column h3 {
             font-size: 0.8rem;
@@ -156,7 +167,6 @@
         .card:hover { border-color: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 15px rgba(0,0,0,0.05); }
         .card.dragging { opacity: 0.4; }
         
-        /* Estilos para campos editables */
         .editable {
             transition: background 0.2s;
             border-radius: 4px;
@@ -181,7 +191,7 @@
         .contact-grid a { color: var(--accent); text-decoration: none; font-weight: 500; }
         .contact-grid a:hover { text-decoration: underline; }
 
-        .contact-data-text { word-break: break-all; min-height: 1em; display: inline-block; min-width: 50px; }
+        .contact-data-text { word-break: break-all; min-height: 1.2em; display: inline-block; min-width: 80%; }
 
         .card-footer { margin-top: 15px; padding-top: 12px; border-top: 1px solid #f3f4f6; display: flex; justify-content: flex-end; }
 
@@ -192,7 +202,7 @@
 
 <div class="hero-header">
     <div class="process-info">
-        <h1 id="displayProcessName">Cargando... <span class="status-badge">Activo</span></h1>
+        <h1 id="displayProcessName">Iniciando... <span class="status-badge">Activo</span></h1>
         <p>Gestionando candidatos en este proceso de selección</p>
     </div>
     <div class="actions-group">
@@ -214,6 +224,8 @@
         <option value="Llamado">Llamado</option>
         <option value="Entrevista">Entrevista</option>
         <option value="Manager">Manager</option>
+        <option value="Contratado">Contratado</option>
+        <option value="Descartado">Descartado</option>
     </select>
     <button onclick="addCandidate()" class="btn-primary">Añadir Candidato</button>
 </div>
@@ -228,7 +240,8 @@
     let processes = JSON.parse(localStorage.getItem('li_crm_mint_proc')) || ["Sourcing General"];
     let currentProcess = localStorage.getItem('li_crm_mint_sel') || processes[0];
     let candidates = JSON.parse(localStorage.getItem('li_crm_mint_cand')) || [];
-    const columns = ['Invitado', 'Aceptado', 'Llamado', 'Entrevista', 'Manager'];
+    // Actualizado con las 2 nuevas columnas
+    const columns = ['Invitado', 'Aceptado', 'Llamado', 'Entrevista', 'Manager', 'Contratado', 'Descartado'];
 
     function init() {
         document.getElementById('displayProcessName').innerHTML = `${currentProcess} <span class="status-badge">Activo</span>`;
@@ -284,16 +297,12 @@
         ['name', 'linkedin', 'email', 'phone', 'salary'].forEach(id => document.getElementById(id).value = '');
     }
 
-    // Función mágica para editar datos
     function updateCandidate(id, field, value) {
         candidates = candidates.map(c => {
-            if (c.id === id) {
-                return { ...c, [field]: value.trim() };
-            }
+            if (c.id === id) { return { ...c, [field]: value.trim() }; }
             return c;
         });
         localStorage.setItem('li_crm_mint_cand', JSON.stringify(candidates));
-        // No refrescamos todo el board para no perder el foco mientras se edita
     }
 
     function deleteCandidate(id) {
@@ -332,11 +341,14 @@
             const colCandidates = candidates.filter(c => c.process === currentProcess && c.status === col);
             const colEl = document.createElement('div');
             colEl.className = 'column';
+            colEl.setAttribute('data-col', col); // Para estilos específicos
             colEl.ondragover = allowDrop;
             colEl.ondragleave = dragLeave;
             colEl.ondrop = (e) => dropCandidate(e, col);
+            
             colEl.innerHTML = `<h3>${col} <span class="count-badge">${colCandidates.length}</span></h3><div id="list-${col}"></div>`;
             const list = colEl.querySelector(`#list-${col}`);
+            
             colCandidates.forEach(c => {
                 const card = document.createElement('div');
                 card.className = 'card';
@@ -349,7 +361,7 @@
                     <span class="card-tag editable" contenteditable="true" onblur="updateCandidate('${c.id}', 'salary', this.innerText)">${c.salary || 'S.B.'}</span>
                     <h4 class="editable" contenteditable="true" onblur="updateCandidate('${c.id}', 'name', this.innerText)">${c.name}</h4>
                     <div class="contact-grid">
-                        <span>🔗</span> <a href="${c.linkedin}" target="_blank">Ver Perfil</a>
+                        <span>🔗</span> <a href="${c.linkedin}" target="_blank">Perfil</a>
                         <span>📧</span> <span class="contact-data-text editable" contenteditable="true" onblur="updateCandidate('${c.id}', 'email', this.innerText)">${c.email || ''}</span>
                         <span>📞</span> <span class="contact-data-text editable" contenteditable="true" onblur="updateCandidate('${c.id}', 'phone', this.innerText)">${c.phone || ''}</span>
                     </div>
